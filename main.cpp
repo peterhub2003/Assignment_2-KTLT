@@ -3,8 +3,8 @@
 int main(int argc, char ** argv) {
     string file_armyknights, file_events;
     if (argc == 1) {
-        file_armyknights = "tc1_armyknights"; // hard-code
-        file_events = "tc1_events";
+        file_armyknights = "tc1_armyknights.txt"; // hard-code
+        file_events = "tc1_events.txt";
     }
     else if (argc == 3) {
         file_armyknights = argv[1];
@@ -15,12 +15,14 @@ int main(int argc, char ** argv) {
         exit(1);
     }
     
+    cout << file_armyknights << "   " << file_events << endl;
     // BEBGIN
     KnightAdventure * knightAdventure = new KnightAdventure();
     knightAdventure->loadArmyKnights(file_armyknights);
     knightAdventure->loadEvents(file_events);
-    knightAdventure->run();
+    //knightAdventure->run();
 
+    knightAdventure->print();
     delete knightAdventure;
 
     return 0;
