@@ -20,7 +20,7 @@ int main(int argc, char ** argv) {
     KnightAdventure * knightAdventure = new KnightAdventure();
     knightAdventure->loadArmyKnights(file_armyknights);
     knightAdventure->loadEvents(file_events);
-    //knightAdventure->run();
+    knightAdventure->run();
 
     knightAdventure->print();
     delete knightAdventure;

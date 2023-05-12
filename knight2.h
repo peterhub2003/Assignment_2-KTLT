@@ -8,12 +8,12 @@
 class BaseKnight;
 class Events;
 
-enum ItemType {Anti = 0, PhoenixI, PhoenixII, PhoenixIII, PhoenixIV};
+enum ItemType {Anti = 0, PhoenixI, PhoenixII, PhoenixIII, PhoenixIV, Nor};
 class BaseItem {
 protected:
     ItemType type;
 public:
-    // ~BaseItem();
+    //~BaseItem();
     ItemType getItemType() const;
     virtual string getName() const = 0;
     virtual bool canUse ( BaseKnight * knight ) = 0;
@@ -59,7 +59,7 @@ public:
 
     
 class BaseBag {
-private:
+protected:
     class Node{
     public:
         BaseItem* item;
@@ -69,41 +69,54 @@ private:
             this->item = _item;
             this->next = _next;
         }
+        ~Node(){
+            delete item;
+            next = nullptr;
+        }
     };
 
     Node* head;
-    short int ar_items[5];
-    int max_capacity;
+    int max_capacity; //If max_capacity = -1 that mean unlimited
     int size;
 
 public:     
 
+    BaseBag();
     ~BaseBag();
-    BaseBag(BaseKnight* knight, int a, int b); //a is phoenix and b is antitode
+    //BaseBag(BaseKnight* knight, int a, int b); //a is phoenix and b is antitode
+    static BaseBag* create(BaseKnight* k, int a, int b);
     virtual bool insertFirst(BaseItem * item);
     virtual BaseItem * get(ItemType itemType);
+    virtual BaseItem* retriveAndGet(BaseKnight* k);
     virtual string toString() const;
+
+    BaseItem* getFollowKnight(BaseKnight* k);
+    int getMaxCapacity() const{return this->max_capacity;}
     void drop(int n);
     void del_items(int n); //Delete n items from head 
-    bool useItem(BaseKnight* k);
+    //bool useItem(BaseKnight* k);
 
 };  
 
 class DragonBag: public BaseBag{
 public:
+    DragonBag();
     bool insertFirst(BaseItem* item);
 };
 
 class LanceBag: public BaseBag{
-
+public:
+    LanceBag();
 };
 
 class NormalBag: public BaseBag{
-
+public:
+    NormalBag();
 };
 
 class PaladinBag: public BaseBag{
 public:
+    PaladinBag();
     bool insertFirst(BaseItem* item);
 };
 
@@ -115,7 +128,7 @@ public:
     //virtual void cal_levelO(const int& i, const int& event_id);
     static BaseOpponent* create(int i, int event_id);
     virtual bool fight(BaseKnight* k) = 0;
-    virtual void printOpponent() const = 0;
+    void printOpponent(int event_id) const;
 };
 
 class MadBear: public BaseOpponent{
@@ -125,12 +138,7 @@ private:
 public:
     MadBear();
     bool fight(BaseKnight* k);
-    void printOpponent() const{
-        cout << "Opponent Name:  " << "MadBear" << endl;
-        cout << "Level        :  " << this->levelO << endl;
-        cout << "BaseDamage   :  " << this->baseDamage << endl;
-        cout << "Gil          :  " << this->gil << endl;
-    }
+
 };
 
 class Bandit: public BaseOpponent{
@@ -140,12 +148,6 @@ private:
 public:
     Bandit();
     bool fight(BaseKnight* k);
-    void printOpponent() const{
-        cout << "Opponent Name:  " << "Bandit" << endl;
-        cout << "Level        :  " << this->levelO << endl;
-        cout << "BaseDamage   :  " << this->baseDamage << endl;
-        cout << "Gil          :  " << this->gil << endl;
-    }
 };
 
 class LordLupin: public BaseOpponent{
@@ -155,12 +157,6 @@ private:
 public:
     LordLupin();
     bool fight(BaseKnight* k);
-    void printOpponent() const{
-        cout << "Opponent Name:  " << "LordLupin" << endl;
-        cout << "Level        :  " << this->levelO << endl;
-        cout << "BaseDamage   :  " << this->baseDamage << endl;
-        cout << "Gil          :  " << this->gil << endl;
-    }
 };
 
 class Elf: public BaseOpponent{
@@ -170,12 +166,6 @@ private:
 public:
     Elf();
     bool fight(BaseKnight* k);
-    void printOpponent() const{
-        cout << "Opponent Name:  " << "Elf" << endl;
-        cout << "Level        :  " << this->levelO << endl;
-        cout << "BaseDamage   :  " << this->baseDamage << endl;
-        cout << "Gil          :  " << this->gil << endl;
-    }
 };
 
 class Troll: public BaseOpponent{
@@ -185,42 +175,25 @@ private:
 public:
     Troll();
     bool fight(BaseKnight* k);
-    void printOpponent() const{
-        cout << "Opponent Name:  " << "Troll" << endl;
-        cout << "Level        :  " << this->levelO << endl;
-        cout << "BaseDamage   :  " << this->baseDamage << endl;
-        cout << "Gil          :  " << this->gil << endl;
-    }
+
 };
 
 class Tornbery: public BaseOpponent{
 public:
     Tornbery(){;}
     bool fight(BaseKnight* k);
-    void printOpponent() const{
-        cout << "Opponent Name:  " << "Tornbery" << endl;
-        cout << "Level        :  " << this->levelO << endl;
-    }
 };
 
 class QueenOfCards: public BaseOpponent{
 public:
     QueenOfCards(){;}
     bool fight(BaseKnight* k);
-    void printOpponent() const{
-        cout << "Opponent Name:  " << "QueenOfCards" << endl;
-        cout << "Level        :  " << this->levelO << endl;
-    }
 };
 
 class NinaDeRings: public BaseOpponent{
 public:
     NinaDeRings(){;}
     bool fight(BaseKnight* k);
-    void printOpponent() const{
-        cout << "Opponent Name:  " << "NinaDeRings" << endl;
-        cout << "Level        :  " << this->levelO << endl;
-    }
 };
 
 
@@ -228,30 +201,18 @@ class DurianGarden: public BaseOpponent{
 public:
     DurianGarden(){;}
     bool fight(BaseKnight* k);
-    void printOpponent() const{
-        cout << "Opponent Name:  " << "DurianGarden" << endl;
-        cout << "Level        :  " << this->levelO << endl;
-    }
 };
 
 class OmegaWeapon: public BaseOpponent{
 public:
     OmegaWeapon(){;}
     bool fight(BaseKnight* k);
-    void printOpponent() const{
-        cout << "Opponent Name:  " << "OmegaWeapon" << endl;
-        cout << "Level        :  " << this->levelO << endl;
-    }
 };
 
 class Hades: public BaseOpponent{
 public:
     Hades(){;}
     bool fight(BaseKnight* k);
-    void printOpponent() const{
-        cout << "Opponent Name:  " << "Hades" << endl;
-        cout << "Level        :  " << this->levelO << endl;
-    }
 };
 
 
@@ -270,16 +231,18 @@ protected:
     BaseBag * bag;
     KnightType knightType;
     bool isPoisonous;
+    float knightBaseDamage;
 
 public:
     BaseKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI);
     static BaseKnight * create(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI);
     string toString() const;
+    float getBaseDamage() const{ return this->knightBaseDamage;}
     bool knightFight(BaseOpponent* opponent);
     bool revival();
 
     bool addItemIntoBag(BaseItem* item);
-    void useItem(BaseKnight* k);
+    bool useItem(BaseKnight* k);
     void dropItem(const int& n);
     
     int getLevel() const;
@@ -299,19 +262,16 @@ public:
 };
 
 class PaladinKnight: public BaseKnight{
-    float knightBaseDamage = 0.06;
 public:
     PaladinKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI);
 };
 
 class LancelotKnight: public BaseKnight{
-    float knightBaseDamage = 0.05;
 public:
     LancelotKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI);
 };
 
 class DragonKnight: public BaseKnight{
-    float knightBaseDamage = 0.075;
 public:
     DragonKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI);
 };
