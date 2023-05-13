@@ -1,6 +1,9 @@
 #include "knight2.h"
 
-//===============================Utility Functions==========================================
+/* * ***************************************************************************** * */
+/* * ****************************UTILITY FUNCTIONS******************************** * */
+/* * ***************************************************************************** * */
+
 bool isPrime(const int& n){ 
     if(n <= 1) return false;
     for(int i = 2; i * i <= n; ++i)
@@ -17,7 +20,7 @@ bool isPytago(int n){
     if(a*a + b*b == c*c || c*c + b*b == a*a || a*a + c*c == b*b) 
         return true;
 
-    return false;
+    return false;   
 }
 
 int Max(const int a, const int b){
@@ -35,8 +38,15 @@ string strip(string s){
     
     return res;
 }
-//==========================================================================================
-/* * *  Implement class inherited from BaseItem   * * */
+/* * ***************************************************************************** * */
+/* * ****************************END UTILITY FUNCTIONS**************************** * */
+/* * ***************************************************************************** * */
+
+
+/* * ***************************************************************************** * */
+/* * **************IMPLEMENT CLASS BASEITEM AND INHERITED OF BASEITEM************* * */
+/* * ***************************************************************************** * */
+
 ItemType BaseItem::getItemType() const{
     return this->type;
 }
@@ -92,9 +102,15 @@ void PhoenixDownIV::use(BaseKnight * k){
     return;   
 }
 
-/* * *                               END implement                     * * */
 /* * ***************************************************************************** * */
-/* * * BEGIN implementation of class BaseBag * * */
+/* * ************ END IMPLEMENTATION BASEITEM AND INHERITED BASEITEM************** * */
+/* * ***************************************************************************** * */
+
+
+
+/* * ***************************************************************************** * */
+/* * ***********************BEGIN IMPLEMENTATION OF CLASS BASEBAG***************** * */
+/* * ***************************************************************************** * */
 BaseBag::BaseBag(){
     this->size = 0;
     this->head = nullptr;
@@ -153,20 +169,16 @@ BaseBag* BaseBag::create(BaseKnight* k, int a, int b){
 
 }
 
-BaseItem* BaseBag::get(ItemType itemType){
+BaseItem* BaseBag::getItemType(ItemType itemType){
     Node* prev = nullptr;
     Node* curr = head;
 
     while(curr){
         if(curr->item->getItemType() == itemType){
-            if(prev != nullptr){
-                Node* temp = this->head->next;
-                this->head->next = curr->next;
-                curr->next = temp;
-                prev->next = this->head;
-                this->head = curr;
-            }
-            return curr->item;
+            BaseItem* temp = this->head->item;
+            this->head->item = curr->item;
+            curr->item = temp;
+            return this->head->item;
         }
         else{
             prev = curr;
@@ -184,14 +196,10 @@ BaseItem* BaseBag::getFollowKnight(BaseKnight* k){
 
     while(curr){
         if(curr->item->canUse(k)){
-            if(prev != nullptr){
-                Node* temp = this->head->next;
-                this->head->next = curr->next;
-                curr->next = temp;
-                prev->next = this->head;
-                this->head = curr;
-            }
-            return curr->item;
+            BaseItem* temp = this->head->item;
+            this->head->item = curr->item;
+            curr->item = temp;
+            return this->head->item;
         }
         else{
             prev = curr;
@@ -206,7 +214,7 @@ BaseItem* BaseBag::retriveAndGet(BaseKnight* k){
     if(this->size == 0) return nullptr;
     BaseItem* item = nullptr;
     if(k->isPoison()){
-        item = this->get(ItemType::Anti);
+        item = this->getItemType(ItemType::Anti);
     }
     else{
         item = this->getFollowKnight(k);
@@ -242,12 +250,12 @@ bool BaseBag::insertFirst(BaseItem* item){
 }
 
 void BaseBag::del_items(int n){
-    if(this->size == 0) return;
+    if(this->size <= 0) return;
     while(n > 0 && this->size > 0){
         Node* curr = this->head->next;
         this->head->next = nullptr;
-
         delete this->head;
+
         this->head = curr;
         --n; --this->size;       
     }
@@ -265,8 +273,13 @@ void BaseBag::drop(int n = 3){
     return;
 }
 
-/* * * END implementation of class BaseBag * * */
-/*============================================================*/
+
+
+/* * ***************************************************************************** * */
+/* * ***********************END IMPLEMENTATION OF CLASS BASEBAG******************* * */
+/* * ***************************************************************************** * */
+
+
 DragonBag::DragonBag(){
     this->max_capacity = 14;
 }
@@ -296,8 +309,12 @@ bool PaladinBag::insertFirst(BaseItem* item){
     ++this->size;
     return true;    
 }
-/*============================================================*/
-/* * * BEGIN implementation of class BaseKnight * * */
+
+
+/* * ***************************************************************************** * */
+/* * ***********************BEGIN IMPLEMENTATION OF CLASS BASEKNIGHT************** * */
+/* * ***************************************************************************** * */
+
 string BaseKnight::toString() const {
     string typeString[4] = {"PALADIN", "LANCELOT", "DRAGON", "NORMAL"};
     // inefficient version, students can change these code
@@ -379,7 +396,8 @@ pair<int, int> BaseKnight::getHPAndMHP() const{
     return {this->hp, this->maxhp};
 }
 void BaseKnight::setHP(int _HP){
-    if(_HP > this->maxhp) {this->hp = this->maxhp;}
+    if(_HP < 0) this->hp = 0; 
+    else if(_HP > this->maxhp) {this->hp = this->maxhp;}
     else this->hp = _HP;
 }
 
@@ -425,9 +443,15 @@ void BaseKnight::dropItem(const int& n){
     this->bag->drop(n);
     return;
 }
-/* * * END implementation of class BaseKnight * * */
-/*=======================================================*/
-/* * *BEGIN IMPLEMENT INHERITED CLASS FROM CLASS BASEKINGHT * * */
+
+/* * ***************************************************************************** * */
+/* * *************************END IMPLEMENTATION OF CLASS BASEKNIGHT************** * */
+/* * ***************************************************************************** * */
+
+
+/* * ***************************************************************************** * */
+/* * ****************BEGIN IMPLEMENTATION INHERITED OF CLASS BASEKNIGHT*********** * */
+/* * ***************************************************************************** * */
 
 PaladinKnight::PaladinKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI)
     : BaseKnight(id, maxhp, level, gil, antidote,  phoenixdownI){
@@ -447,27 +471,24 @@ DragonKnight::DragonKnight(int id, int maxhp, int level, int gil, int antidote, 
     : BaseKnight(id, maxhp, level, gil, antidote,  phoenixdownI){
     this->knightType = KnightType::DRAGON;
     this->bag = BaseBag::create(this, phoenixdownI, antidote);
+    this->knightBaseDamage = 0.075;
 }
 
 NormalKnight::NormalKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI)
     : BaseKnight(id, maxhp, level, gil, antidote,  phoenixdownI){ 
     this->knightType = KnightType::NORMAL;
     this->bag = BaseBag::create(this, phoenixdownI, antidote);
-    this->knightBaseDamage = 0.075;
+
 }
 
-/* * *END IMPLEMENT INHERITED CLASS FROM CLASS BASEKINGHT * * */
-/*==================================================================================*/
-/* * *BEGIN IMPLEMENT OPPONENT CLASS * * */
-void BaseOpponent::printOpponent(int event_id) const{
-    string Type[11] = {"MadBear", "Bandit", "LordLupin", "Elf", "Troll", "Tornbery", 
-                      "QueenOfCards","NinaDeRings", "DurianGarden", "OmegaWeapon", "Hades"};
-    string res = "";
-    res += "[Name: " + Type[event_id - 1]
-        +  ", Level: " + to_string(this->levelO)
-        +  ']'; 
-    cout << res << endl;
-}
+/* * ***************************************************************************** * */
+/* * ******************END IMPLEMENTATION INHERITED OF CLASS BASEKNIGHT*********** * */
+/* * ***************************************************************************** * */
+
+
+/* * ***************************************************************************** * */
+/* * ***********************BEGIN IMPLEMENTATION OF CLASS BASEOPPONENT************ * */
+/* * ***************************************************************************** * */
 
 BaseOpponent* BaseOpponent::create(int i, int event_id){
     BaseOpponent* opponent = nullptr;
@@ -504,10 +525,18 @@ BaseOpponent* BaseOpponent::create(int i, int event_id){
     else {opponent = new Hades();}
 
     opponent->levelO = (i + event_id) % 10 + 1;
-    // cout << "Level of opponent: " << opponent->levelO << endl;
     return opponent;
 }
 
+/* * ***************************************************************************** * */
+/* * **********************END IMPLEMENTATION OF CLASS OPPONENT******************* * */
+/* * ***************************************************************************** * */
+
+
+
+/* * ***************************************************************************** * */
+/* * *******************BEGIN IMPLEMENTATION INHERITED OF CLASS OPPONENT********** * */
+/* * ***************************************************************************** * */
 
 MadBear::MadBear(){baseDamage = 10; gil = 100;}
 Bandit::Bandit(){baseDamage = 15; gil = 150;}
@@ -614,7 +643,7 @@ bool Tornbery::fight(BaseKnight* k){
             k->setAttrPoison(false);
         }
     }
-    return true;
+    return false;
 }
 
 bool QueenOfCards::fight(BaseKnight* k){
@@ -668,8 +697,15 @@ bool Hades::fight(BaseKnight* k){
     }
 }
 
-/*======================================================================*/
-/* * * BEGIN implementation of class ArmyKnights * * */
+
+/* * ***************************************************************************** * */
+/* * *********************END IMPLEMENTATION INHERITED OF CLASS OPPONENT********** * */
+/* * ***************************************************************************** * */
+
+
+/* * ***************************************************************************** * */
+/* * ****************BEGIN IMPLEMENTATION CLASS ARMYKNGIHTS*********************** * */
+/* * ***************************************************************************** * */
 
 ArmyKnights::ArmyKnights(const string& file_armyknights){
     for(int i = 0; i < 3; this->isTake[i]=false, ++i);
@@ -924,10 +960,14 @@ void ArmyKnights::printResult(bool win) const {
     cout << (win ? "WIN" : "LOSE") << endl;
 }
 
-/* * * END implementation of class ArmyKnights * * */
-/**************************************************************/
+/* * ***************************************************************************** * */
+/* * *******************END IMPLEMENTATION CLASS ARMYKNIGHTS********************** * */
+/* * ***************************************************************************** * */
 
-/* * *BEGIN IMPLEMENTATION OF CLASS EVENTS * * */
+
+/* * ***************************************************************************** * */
+/* * *******************BEGIN IMPLEMENTATION CLASS EVENTS************************* * */
+/* * ***************************************************************************** * */
 
 Events::Events(const string& file_events){
 
@@ -965,11 +1005,15 @@ int Events::getEvent(int i) const {
 }
 
 
-/* * *END IMPLEMENTATION OF CLASS EVENTS * * */
-/**************************************************************/
+/* * ***************************************************************************** * */
+/* * *******************END IMPLEMENTATION CLASS EVENTS*************************** * */
+/* * ***************************************************************************** * */
 
 
-/* * * BEGIN implementation of class KnightAdventure * * */
+/* * ***************************************************************************** * */
+/* * *******************BEGIN IMPLEMENTATION CLASS KNIGHTADVENTURE**************** * */
+/* * ***************************************************************************** * */
+
 KnightAdventure::KnightAdventure() {
     armyKnights = nullptr;
     events = nullptr;
@@ -994,10 +1038,26 @@ void KnightAdventure::run(){
 
     return;
 }
-/* * * END implementation of class KnightAdventure * * */
 
-/*==================================================================*/
-/*=======================DEBUG======================================*/
+/* * ***************************************************************************** * */
+/* * *********************END IMPLEMENTATION CLASS KNIGHTADVENTURE**************** * */
+/* * ***************************************************************************** * */
+
+
+/* * ***************************************************************************** * */
+/* * *************************************DEBUG*********************************** * */
+/* * ***************************************************************************** * */
+
+void BaseOpponent::printOpponent(int event_id) const{
+    string Type[11] = {"MadBear", "Bandit", "LordLupin", "Elf", "Troll", "Tornbery", 
+                      "QueenOfCards","NinaDeRings", "DurianGarden", "OmegaWeapon", "Hades"};
+    string res = "";
+    res += "[Name: " + Type[event_id - 1]
+        +  ", Level: " + to_string(this->levelO)
+        +  ']'; 
+    cout << res << endl;
+}
+
 void ArmyKnights::printOppo(Events* events) const{
     for(int i = 0; i < events->count(); ++i){
         if(events->getEvent(i) <= 11 && events->getEvent(i) >= 1)

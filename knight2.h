@@ -13,7 +13,6 @@ class BaseItem {
 protected:
     ItemType type;
 public:
-    //~BaseItem();
     ItemType getItemType() const;
     virtual string getName() const = 0;
     virtual bool canUse ( BaseKnight * knight ) = 0;
@@ -84,17 +83,17 @@ public:
     BaseBag();
     ~BaseBag();
     //BaseBag(BaseKnight* knight, int a, int b); //a is phoenix and b is antitode
+    virtual string toString() const;
     static BaseBag* create(BaseKnight* k, int a, int b);
     virtual bool insertFirst(BaseItem * item);
-    virtual BaseItem * get(ItemType itemType);
+    virtual BaseItem * getItemType(ItemType itemType);
     virtual BaseItem* retriveAndGet(BaseKnight* k);
-    virtual string toString() const;
-
     BaseItem* getFollowKnight(BaseKnight* k);
+    
+    
     int getMaxCapacity() const{return this->max_capacity;}
     void drop(int n);
     void del_items(int n); //Delete n items from head 
-    //bool useItem(BaseKnight* k);
 
 };  
 
@@ -125,7 +124,6 @@ class BaseOpponent{
 protected:
     int levelO;
 public:
-    //virtual void cal_levelO(const int& i, const int& event_id);
     static BaseOpponent* create(int i, int event_id);
     virtual bool fight(BaseKnight* k) = 0;
     void printOpponent(int event_id) const;

@@ -22,7 +22,7 @@ int main(int argc, char ** argv) {
     knightAdventure->loadEvents(file_events);
     knightAdventure->run();
 
-    knightAdventure->print();
+    //knightAdventure->print();
     delete knightAdventure;
 
     return 0;
