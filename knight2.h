@@ -61,12 +61,15 @@ class BaseBag {
 protected:
     class Node{
     public:
+
+        int id;
         BaseItem* item;
         Node* next;
 
-        Node(BaseItem* _item, Node* _next = nullptr){
+        Node(int _id, BaseItem* _item, Node* _next = nullptr){
             this->item = _item;
             this->next = _next;
+            this->id = _id;
         }
         ~Node(){
             delete item;

@@ -38,6 +38,7 @@ string strip(string s){
     
     return res;
 }
+
 /* * ***************************************************************************** * */
 /* * ****************************END UTILITY FUNCTIONS**************************** * */
 /* * ***************************************************************************** * */
@@ -176,8 +177,12 @@ BaseItem* BaseBag::getFollowType(ItemType itemType){
     while(curr){
         if(curr->item->getItemType() == itemType){
             BaseItem* temp = this->head->item;
+            int temp_id = this->head->id;
             this->head->item = curr->item;
+            this->head->id = curr->id;
             curr->item = temp;
+            curr->id = temp_id;
+
             return this->head->item;
         }
         else{
@@ -197,8 +202,12 @@ BaseItem* BaseBag::getFollowKnight(BaseKnight* k){
     while(curr){
         if(curr->item->canUse(k)){
             BaseItem* temp = this->head->item;
+            int temp_id = this->head->id;
             this->head->item = curr->item;
+            this->head->id = curr->id;
             curr->item = temp;
+            curr->id = temp_id;
+
             return this->head->item;
         }
         else{
@@ -242,7 +251,7 @@ string BaseBag::toString() const{
 
 bool BaseBag::insertFirst(BaseItem* item){
     if(this->size == this->max_capacity) return false;
-    Node* new_head = new Node(item, this->head);
+    Node* new_head = new Node(this->size + 1, item, this->head);
     this->head = new_head;
 
     ++this->size;
@@ -270,7 +279,28 @@ void BaseBag::drop(int n = 3){
         this->head = nullptr;
         return;       
     }
-    this->del_items(n);
+    else {
+        int count = 0;
+        Node* prev = nullptr;
+        Node* curr = this->head;
+        while(count < 3 && curr){
+            if(curr->id <= this->size && curr->id >= this->size - 2){
+                if(prev == nullptr){
+
+                }
+                else{
+                    
+                }
+                ++count;
+            }else{
+                prev = curr;
+                curr = curr->next;
+            }
+        }
+
+        this->size -= 3;
+    }
+    
     return;
 }
 
@@ -288,7 +318,7 @@ bool DragonBag::insertFirst(BaseItem* item){
     if(this->size == this->max_capacity) return false;
     if(item->getItemType() == ItemType::Anti) return false;
 
-    Node* new_head = new Node(item, this->head);
+    Node* new_head = new Node(this->size + 1, item, this->head);
     this->head = new_head;
     ++this->size;
     return true;  
@@ -305,7 +335,7 @@ PaladinBag::PaladinBag(){
     this->max_capacity = -1;
 }
 bool PaladinBag::insertFirst(BaseItem* item){
-    Node* new_head = new Node(item, this->head);
+    Node* new_head = new Node(this->size + 1, item, this->head);
     this->head = new_head;
     ++this->size;
     return true;    
