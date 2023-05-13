@@ -169,7 +169,7 @@ BaseBag* BaseBag::create(BaseKnight* k, int a, int b){
 
 }
 
-BaseItem* BaseBag::getItemType(ItemType itemType){
+BaseItem* BaseBag::getFollowType(ItemType itemType){
     Node* prev = nullptr;
     Node* curr = head;
 
@@ -214,7 +214,7 @@ BaseItem* BaseBag::retriveAndGet(BaseKnight* k){
     if(this->size == 0) return nullptr;
     BaseItem* item = nullptr;
     if(k->isPoison()){
-        item = this->getItemType(ItemType::Anti);
+        item = this->getFollowType(ItemType::Anti);
     }
     else{
         item = this->getFollowKnight(k);
@@ -249,6 +249,7 @@ bool BaseBag::insertFirst(BaseItem* item){
     return true;
 }
 
+//Delete n items from head
 void BaseBag::del_items(int n){
     if(this->size <= 0) return;
     while(n > 0 && this->size > 0){
@@ -364,16 +365,24 @@ bool BaseKnight::knightFight(BaseOpponent* opponent){
     bool res = opponent->fight(this);
     if(!res){
         if(this->hp <= 0){
-            bool isRevi = this->revival();
-            return isRevi;
+            this->revival();
         }
-        else{
-            this->useItem(this);
-            return true;
-        }
-    }
+        else if(this->isPoison()){
+            bool use = this->useItem(this);
+            if(!use){
+                this->dropItem(3);
+                this->setHP(this->getHPAndMHP().first - 10);
+                this->setAttrPoison(false);  
 
-    this->useItem(this);
+                if(this->hp <= 0) this->revival();             
+            }
+        }
+        else {
+            this->useItem(this);
+        }
+        
+    }
+    else{ this->useItem(this);}
     return res;
 }
 
@@ -433,6 +442,8 @@ bool BaseKnight::useItem(BaseKnight * k){
     BaseItem* item = this->bag->retriveAndGet(k);
     if(item == nullptr) return false;
     else{
+        if(item->getItemType() == ItemType::Anti) this->antidote -= 1;
+        if(item->getItemType() == ItemType::PhoenixI) this->phoenixdownI -= 1;
         item->use(this);
         this->bag->del_items(1);
         return true;
@@ -632,30 +643,24 @@ bool Tornbery::fight(BaseKnight* k){
         return true;
     }    
     else{
-        k->setAttrPoison(true);
         if(k->getType() == KnightType::DRAGON) return true;
-        if(k->getPhoeAndAnti().second > 0){
-            k->useItem(k);
-        }
-        else{
-            k->dropItem(3);
-            k->setHP(k->getHPAndMHP().first - 10);
-            k->setAttrPoison(false);
-        }
+        k->setAttrPoison(true);
+        return false;
     }
-    return false;
 }
 
 bool QueenOfCards::fight(BaseKnight* k){
     int level_knight = k->getLevel();
     if(level_knight >= this->levelO){
         k->setGil(k->getGil() * 2);
+        return true;
     }
     else{
         if(k->getType() != KnightType::PALADIN)
             k->setGil(k->getGil() / 2);
+        return false;
     }
-    return true;
+
 }
 
 bool NinaDeRings::fight(BaseKnight* k){
@@ -669,7 +674,7 @@ bool NinaDeRings::fight(BaseKnight* k){
     }
     return true;
 }
-
+    
 bool DurianGarden::fight(BaseKnight* k){
     k->setHP(k->getHPAndMHP().second);
     return true;
@@ -751,11 +756,21 @@ bool ArmyKnights::fight(BaseOpponent * opponent){
         return true;
     }
     else{
-        delete k;
-        this->NumberOfKnights -= 1;
+        if(k->getHPAndMHP().first <= 0){
+            delete k;
+            this->NumberOfKnights -= 1;
+        }
         return false;
     }
 
+}
+
+void ArmyKnights::sort_knights(int idx_begin, int idx_end){
+    for(int i = idx_begin; i < idx_end; ++i){
+        this->ar_knight[i] = this->ar_knight[i + 1];
+    }
+
+    return;
 }
 
 bool ArmyKnights::lastFight(){
@@ -766,20 +781,18 @@ bool ArmyKnights::lastFight(){
         if(this->hasAll()){
             int Ulti_HP = 5000;
             int idx = this->NumberOfKnights - 1;
-            int end_idx = this->NumberOfKnights - 1;
             while(Ulti_HP > 0 && idx >= 0){
-                BaseKnight* k = this->lastKnight();
+                BaseKnight* k = this->ar_knight[idx];
                 if(k->getType() !=  KnightType::NORMAL){
-                    int damage = (int)k->getHPAndMHP().first * k->getLevel() * k->getBaseDamage();
+                    this->sort_knights(idx, this->NumberOfKnights - 1);
+                    this->ar_knight[this->NumberOfKnights - 1] = k;
+
+                    int damage = (int)(k->getHPAndMHP().first * k->getLevel() * k->getBaseDamage());
                     Ulti_HP -= damage;
                     if(Ulti_HP <= 0) return true;
                     else{
-                        BaseKnight* temp = this->ar_knight[end_idx];
-                        this->ar_knight[end_idx] = this->ar_knight[idx];
-                        this->ar_knight[idx] = temp;
                         delete k;
                         this->NumberOfKnights -= 1;
-                        --end_idx; 
                     }
                 }
                 --idx;
@@ -797,7 +810,7 @@ bool ArmyKnights::lastFight(){
                 return false;
             }
         }
-        else{
+        else {
             for(int i = 0; i <this->NumberOfKnights; i++){
                 delete this->ar_knight[i];
             }
@@ -844,7 +857,7 @@ bool ArmyKnights::adventure(Events* events){
             }
             if(event_id == 11 && this->hasFightHades) {
                 this->printInfo();
-               continue;
+                continue;
             }
 
             BaseOpponent* opponent = BaseOpponent::create(i, event_id);
