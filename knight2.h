@@ -80,6 +80,7 @@ protected:
     Node* head;
     int max_capacity; //If max_capacity = -1 that mean unlimited
     int size;
+    int max_id;
 
 public:     
 
@@ -93,7 +94,7 @@ public:
     virtual BaseItem* retriveAndGet(BaseKnight* k);
     BaseItem* getFollowKnight(BaseKnight* k);
     
-    
+    void find(int&, int&, int&);
     int getMaxCapacity() const{return this->max_capacity;}
     void drop(int n);
     void del_items(int n); //Delete n items from head 

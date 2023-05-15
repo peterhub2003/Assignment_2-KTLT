@@ -11,7 +11,7 @@ bool isPrime(const int& n){
     return true;
 }
 
-bool isPytago(int n){
+bool isPytago(const int n){
     short int a = n%10;
     short int b = (n/10)%10;
     short int c = ((n/10)/10)%10;
@@ -115,6 +115,7 @@ void PhoenixDownIV::use(BaseKnight * k){
 BaseBag::BaseBag(){
     this->size = 0;
     this->head = nullptr;
+    this->max_id = 0;
 }
 
 BaseBag::~BaseBag(){
@@ -150,6 +151,7 @@ BaseBag* BaseBag::create(BaseKnight* k, int a, int b){
         success = bag->insertFirst(item);
         if(!success){
             du_a = a - i + 1;
+            delete item;
             break;
         }
     }
@@ -161,6 +163,7 @@ BaseBag* BaseBag::create(BaseKnight* k, int a, int b){
             success = bag->insertFirst(item);
             if(!success){
                 du_b = b - i + 1;
+                delete item;
                 break;
             }
         }
@@ -171,7 +174,6 @@ BaseBag* BaseBag::create(BaseKnight* k, int a, int b){
 }
 
 BaseItem* BaseBag::getFollowType(ItemType itemType){
-    Node* prev = nullptr;
     Node* curr = head;
 
     while(curr){
@@ -186,7 +188,6 @@ BaseItem* BaseBag::getFollowType(ItemType itemType){
             return this->head->item;
         }
         else{
-            prev = curr;
             curr = curr->next;
         }
     }
@@ -196,7 +197,6 @@ BaseItem* BaseBag::getFollowType(ItemType itemType){
 }
 
 BaseItem* BaseBag::getFollowKnight(BaseKnight* k){
-    Node* prev = nullptr;
     Node* curr = head;
 
     while(curr){
@@ -211,7 +211,6 @@ BaseItem* BaseBag::getFollowKnight(BaseKnight* k){
             return this->head->item;
         }
         else{
-            prev = curr;
             curr = curr->next;
         }
     }
@@ -248,13 +247,13 @@ string BaseBag::toString() const{
     return res;
 }
 
-
 bool BaseBag::insertFirst(BaseItem* item){
     if(this->size == this->max_capacity) return false;
-    Node* new_head = new Node(this->size + 1, item, this->head);
+    Node* new_head = new Node(this->max_id + 1, item, this->head);
     this->head = new_head;
 
     ++this->size;
+    ++this->max_id;
     return true;
 }
 
@@ -273,38 +272,67 @@ void BaseBag::del_items(int n){
     return;
 }
 
+void BaseBag::find(int& a_min, int& a_mid, int& a_max){
+    Node* curr = this->head;
+    while(curr){
+        if(curr->id > a_max){
+            a_min = a_mid;
+            a_mid = a_max;
+            a_max = curr->id;
+        }
+        else if(curr->id > a_min){
+            if(curr->id > a_mid){
+                a_min = a_mid;
+                a_mid = curr->id;
+            }
+            else{
+                a_min = curr->id;
+            }
+        }
+        curr = curr->next;
+    }
+    return;
+}   
+
 void BaseBag::drop(int n = 3){
-    if(this->size < 3){
+    if(this->size <= n){
         this->del_items(this->size);
         this->head = nullptr;
         return;       
     }
     else {
-        int count = 0;
+        int a_min = 0, a_mid = 0, a_max = 0;
+        int count_drop = 0;
+        this->find(a_min, a_mid, a_max);
         Node* prev = nullptr;
         Node* curr = this->head;
-        while(count < 3 && curr){
-            if(curr->id <= this->size && curr->id >= this->size - 2){
-                if(prev == nullptr){
 
+        while(curr && count_drop < n){
+            if(curr->id == a_min || curr->id == a_mid || curr->id == a_max){
+                if(prev == nullptr){
+                    this->head = this->head->next;
+                    curr->next = nullptr;
+                    delete curr;
+                    curr = this->head;
                 }
                 else{
-                    
+                    prev->next = curr->next;
+                    curr->next = nullptr;
+                    delete curr;
+                    curr = prev->next;
                 }
-                ++count;
-            }else{
+                ++count_drop;
+                --this->size;
+            }
+            else{
                 prev = curr;
                 curr = curr->next;
             }
         }
-
-        this->size -= 3;
     }
     
     return;
 }
-
-
 
 /* * ***************************************************************************** * */
 /* * ***********************END IMPLEMENTATION OF CLASS BASEBAG******************* * */
@@ -318,26 +346,28 @@ bool DragonBag::insertFirst(BaseItem* item){
     if(this->size == this->max_capacity) return false;
     if(item->getItemType() == ItemType::Anti) return false;
 
-    Node* new_head = new Node(this->size + 1, item, this->head);
+    Node* new_head = new Node(this->max_id + 1, item, this->head);
     this->head = new_head;
     ++this->size;
+    ++this->max_id;
+
     return true;  
 }
-
 LanceBag::LanceBag(){
     this->max_capacity = 16;
 }
 NormalBag::NormalBag(){
     this->max_capacity = 19;
 }
-
 PaladinBag::PaladinBag(){
-    this->max_capacity = -1;
+    this->max_capacity = -1; // = -1 that means unlimited
 }
 bool PaladinBag::insertFirst(BaseItem* item){
-    Node* new_head = new Node(this->size + 1, item, this->head);
+    Node* new_head = new Node(this->max_id + 1, item, this->head);
     this->head = new_head;
     ++this->size;
+    ++this->max_id;
+
     return true;    
 }
 
@@ -435,8 +465,8 @@ pair<int, int> BaseKnight::getHPAndMHP() const{
     return {this->hp, this->maxhp};
 }
 void BaseKnight::setHP(int _HP){
-    if(_HP < 0) this->hp = 0; 
-    else if(_HP > this->maxhp) {this->hp = this->maxhp;}
+    //if(_HP < 0) this->hp = 0; 
+    if(_HP > this->maxhp) {this->hp = this->maxhp;}
     else this->hp = _HP;
 }
 
@@ -602,6 +632,7 @@ bool MadBear::fight(BaseKnight* k){
         return false;
     }
 }
+
 bool Bandit::fight(BaseKnight* k){
     if(k->getType() == KnightType::LANCELOT ||k->getType() == KnightType::PALADIN){
         k->setGil(k->getGil() + this->gil);
@@ -634,6 +665,7 @@ bool LordLupin::fight(BaseKnight* k){
         return false;
     }
 }
+
 bool Elf::fight(BaseKnight* k){
     if(k->getType() == KnightType::LANCELOT ||k->getType() == KnightType::PALADIN){
         k->setGil(k->getGil() + this->gil);
@@ -650,6 +682,7 @@ bool Elf::fight(BaseKnight* k){
         return false;
     }
 }
+
 bool Troll::fight(BaseKnight* k){
     if(k->getType() == KnightType::LANCELOT ||k->getType() == KnightType::PALADIN){
         k->setGil(k->getGil() + this->gil);
@@ -690,7 +723,6 @@ bool QueenOfCards::fight(BaseKnight* k){
             k->setGil(k->getGil() / 2);
         return false;
     }
-
 }
 
 bool NinaDeRings::fight(BaseKnight* k){
@@ -1007,6 +1039,7 @@ void ArmyKnights::printResult(bool win) const {
 /* * *******************END IMPLEMENTATION CLASS ARMYKNIGHTS********************** * */
 /* * ***************************************************************************** * */
 
+/*~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ~~  ~ */
 
 /* * ***************************************************************************** * */
 /* * *******************BEGIN IMPLEMENTATION CLASS EVENTS************************* * */
