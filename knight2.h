@@ -244,7 +244,7 @@ public:
     bool knightFight(BaseOpponent* opponent);
     bool revival();
 
-    bool addItemIntoBag(BaseItem* item);
+    bool addItem(BaseItem* item);
     bool useItem(BaseKnight* k);
     void dropItem(const int& n);
     

@@ -143,7 +143,7 @@ BaseBag* BaseBag::create(BaseKnight* k, int a, int b){
         bag = new NormalBag();       
     } 
 
-    int du_a = 0, du_b = 0;
+    int du_a = 0;
     bool success;
     BaseItem* item = nullptr;
     for(int i = 1; i <= a; ++i){
@@ -156,13 +156,12 @@ BaseBag* BaseBag::create(BaseKnight* k, int a, int b){
         }
     }
 
-    if(du_a > 0 || k->getType() == KnightType::DRAGON) du_b = b;
+    if(du_a > 0 || k->getType() == KnightType::DRAGON) return bag;
     else{
         for(int i = 1; i <= b; ++i){
             item = new Antidote();
             success = bag->insertFirst(item);
             if(!success){
-                du_b = b - i + 1;
                 delete item;
                 break;
             }
@@ -227,8 +226,8 @@ BaseItem* BaseBag::retriveAndGet(BaseKnight* k){
     else{
         item = this->getFollowKnight(k);
     }
-
     return item;
+
 }
 
 string BaseBag::toString() const{
@@ -465,7 +464,7 @@ pair<int, int> BaseKnight::getHPAndMHP() const{
     return {this->hp, this->maxhp};
 }
 void BaseKnight::setHP(int _HP){
-    //if(_HP < 0) this->hp = 0; 
+    if(_HP < 0) this->hp = 0; 
     if(_HP > this->maxhp) {this->hp = this->maxhp;}
     else this->hp = _HP;
 }
@@ -493,7 +492,7 @@ bool BaseKnight::revival(){
     else return true;
 }
 
-bool BaseKnight::addItemIntoBag(BaseItem* item){
+bool BaseKnight::addItem(BaseItem* item){
     bool res = this->bag->insertFirst(item);
     return res;
 }
@@ -873,7 +872,7 @@ bool ArmyKnights::lastFight(){
             }
         }
         else {
-            for(int i = 0; i <this->NumberOfKnights; i++){
+            for(int i = 0; i < this->NumberOfKnights; i++){
                 delete this->ar_knight[i];
             }
             this->NumberOfKnights = 0;
@@ -984,7 +983,7 @@ void ArmyKnights::updateItem(BaseItem* item){
 
     int idx = this->NumberOfKnights - 1;
     while(idx >= 0){
-        bool success = this->ar_knight[idx]->addItemIntoBag(item);
+        bool success = this->ar_knight[idx]->addItem(item);
         if(success) return;
         --idx;
     }
